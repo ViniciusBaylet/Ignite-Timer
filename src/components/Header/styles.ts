@@ -18,6 +18,8 @@ export const HeaderContainer = styled.header`
     justify-content: center;
     align-items: center;
 
+    box-shadow: none;
+
     color: ${props => props.theme['gray-100']};
 
     border-top: 3px solid transparent;

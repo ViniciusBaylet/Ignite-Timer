@@ -1,7 +1,7 @@
-import { Play } from "lucide-react";
+import { Hand, Play } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import { CountdownContainer, FormContainer, HomeContainer, MinutesAmountInput, Separator, StartCountdownButton, TaskInput } from "./styles";
+import { CountdownContainer, FormContainer, HomeContainer, MinutesAmountInput, Separator, StartCountdownButton, StopCountdownButton, TaskInput } from "./styles";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import zod from "zod";
@@ -25,6 +25,7 @@ interface Cycle {
     task: string;
     minutesAmount: number;
     startDate: Date;
+    interruptDate?: Date;
 }
 
 export function Home() {
@@ -56,6 +57,18 @@ export function Home() {
         reset();
     }
 
+    function handleInterruptCycle() {
+        setCycles(cycles.map(cycle => {
+            if (cycle.id == activeCycleId) {
+                return { ...cycle, interruptDate: new Date() }
+            } else {
+                return cycle
+            }
+        }));
+
+        setActiveCycleId(null);
+    }
+
     const activeCycle = cycles.find((cycle) => cycle.id == activeCycleId);
 
     const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0;
@@ -68,9 +81,9 @@ export function Home() {
 
     useEffect(() => {
         let interval: number;
-        if(activeCycle) {
+        if (activeCycle) {
             interval = setInterval(() => {
-               setAmountSecondsPassed(differenceInSeconds(new Date(), activeCycle.startDate))
+                setAmountSecondsPassed(differenceInSeconds(new Date(), activeCycle.startDate))
             }, 1000)
         }
 
@@ -82,7 +95,7 @@ export function Home() {
 
     //Mudando o title da página com useEffect
     useEffect(() => {
-        if(activeCycle) {
+        if (activeCycle) {
             document.title = `${minutes}:${seconds}`
         }
     }, [minutes, seconds, activeCycle]);
@@ -98,6 +111,7 @@ export function Home() {
                     <TaskInput
                         id="task"
                         placeholder="Dê um nome para o seu projeto" list="task-suggestions"
+                        disabled={!!activeCycle}
                         {...register('task')}
                     />
 
@@ -115,6 +129,7 @@ export function Home() {
                         placeholder="00"
                         min={1}
                         max={60}
+                        disabled={!!activeCycle}
                         {...register('minutesAmount', { valueAsNumber: true })}
                     />
 
@@ -130,10 +145,23 @@ export function Home() {
                     <span>{seconds[1]}</span>
                 </CountdownContainer>
 
-                <StartCountdownButton type="submit" disabled={isSubmitDisabled} >
-                    <Play size={15} />
-                    Comerçar
-                </StartCountdownButton>
+                {activeCycle ? (
+                    <StopCountdownButton
+                        onClick={handleInterruptCycle}
+                        type="button" 
+                    >
+                        <Hand size={15} />
+                        Interromper
+                    </StopCountdownButton>
+                ) : (
+                    <StartCountdownButton
+                        type="submit"
+                        disabled={isSubmitDisabled}
+                    >
+                        <Play size={15} />
+                        Comerçar
+                    </StartCountdownButton>
+                )}
             </form>
         </HomeContainer>
     )

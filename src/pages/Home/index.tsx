@@ -26,6 +26,7 @@ interface Cycle {
     minutesAmount: number;
     startDate: Date;
     interruptDate?: Date;
+    finishedDate?: Date;
 }
 
 export function Home() {
@@ -58,7 +59,7 @@ export function Home() {
     }
 
     function handleInterruptCycle() {
-        setCycles(cycles.map(cycle => {
+        setCycles(state => state.map(cycle => {
             if (cycle.id == activeCycleId) {
                 return { ...cycle, interruptDate: new Date() }
             } else {
@@ -83,7 +84,21 @@ export function Home() {
         let interval: number;
         if (activeCycle) {
             interval = setInterval(() => {
-                setAmountSecondsPassed(differenceInSeconds(new Date(), activeCycle.startDate))
+                const secondDifference = differenceInSeconds(new Date(), activeCycle.startDate);
+
+                if (secondDifference >= totalSeconds) {
+                    setCycles(state => state.map(cycle => {
+                        if (cycle.id == activeCycleId) {
+                            return { ...cycle, finishedDate: new Date() }
+                        } else {
+                            return cycle
+                        }
+                    }))
+                    setAmountSecondsPassed(totalSeconds);
+                    clearInterval(interval);
+                } else {
+                    setAmountSecondsPassed(secondDifference)
+                }
             }, 1000)
         }
 
@@ -91,7 +106,7 @@ export function Home() {
         return () => {
             clearInterval(interval);
         }
-    }, [activeCycle]);
+    }, [activeCycle, totalSeconds, activeCycleId]);
 
     //Mudando o title da página com useEffect
     useEffect(() => {
@@ -148,7 +163,7 @@ export function Home() {
                 {activeCycle ? (
                     <StopCountdownButton
                         onClick={handleInterruptCycle}
-                        type="button" 
+                        type="button"
                     >
                         <Hand size={15} />
                         Interromper

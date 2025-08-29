@@ -1,26 +1,13 @@
 import { Hand, Play } from "lucide-react";
-import { useForm } from "react-hook-form";
 
-import { CountdownContainer, HomeContainer, Separator, StartCountdownButton, StopCountdownButton } from "./styles";
+import { HomeContainer, StartCountdownButton, StopCountdownButton } from "./styles";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import zod from "zod";
-import { useEffect, useState } from "react";
-import { differenceInSeconds } from "date-fns"
+import { createContext, useEffect, useState } from "react";
 import { NewCycleForm } from "./components/NewCycleForm";
 import { Countdown } from "./components/Countdown";
 
-const newCycleFormValidationSchema = zod.object({
-    task: zod.string().min(1, "Informe a tarefa"),
-    minutesAmount: zod.number().min(1, "O ciclo precisa de no mínimo 1 minuto").max(60, "O ciclo precisa ser de no máximo 60 minutos")
-});
-
-// interface NewCycleFormData {
-//     task: string
-//     minutesAmount: number
-// }
-
-type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>;
+// Prop Drilling -> Quando a gente tem MUITAS props APENAS para comunicação entre componentes
+// Context API -> Permite compartilharmos informações entre VÁRIOS componentes ao mesmo tempo
 
 interface Cycle {
     id: string;
@@ -31,19 +18,18 @@ interface Cycle {
     finishedDate?: Date;
 }
 
+interface CyclesContextType {
+    activeCycle: Cycle | undefined;
+    activeCycleId: string | null;
+    markCurrentCycleAsFinished: () => void;
+}
+
+export const CyclesContext = createContext({} as CyclesContextType);
+
 export function Home() {
 
     const [cycles, setCycles] = useState<Cycle[]>([]);
     const [activeCycleId, setActiveCycleId] = useState<string | null>(null);
-    const [amountSecondsPassed, setAmountSecondsPassed] = useState(0);
-
-    const { register, handleSubmit, watch, reset } = useForm<NewCycleFormData>({
-        resolver: zodResolver(newCycleFormValidationSchema),
-        defaultValues: {
-            task: "",
-            minutesAmount: 0
-        }
-    });
 
     function handleCreateNewCycle(data: NewCycleFormData) {
         const newCycle: Cycle = {
@@ -72,50 +58,17 @@ export function Home() {
         setActiveCycleId(null);
     }
 
+    function markCurrentCycleAsFinished() {
+        setCycles(state => state.map(cycle => {
+            if (cycle.id == activeCycleId) {
+                return { ...cycle, finishedDate: new Date() }
+            } else {
+                return cycle
+            }
+        }))
+    }
+
     const activeCycle = cycles.find((cycle) => cycle.id == activeCycleId);
-
-    const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0;
-    const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0;
-    const minutesAmount = Math.floor(currentSeconds / 60);
-    const secondsAmount = currentSeconds % 60;
-
-    const minutes = String(minutesAmount).padStart(2, '0');
-    const seconds = String(secondsAmount).padStart(2, '0');
-
-    useEffect(() => {
-        let interval: number;
-        if (activeCycle) {
-            interval = setInterval(() => {
-                const secondDifference = differenceInSeconds(new Date(), activeCycle.startDate);
-
-                if (secondDifference >= totalSeconds) {
-                    setCycles(state => state.map(cycle => {
-                        if (cycle.id == activeCycleId) {
-                            return { ...cycle, finishedDate: new Date() }
-                        } else {
-                            return cycle
-                        }
-                    }))
-                    setAmountSecondsPassed(totalSeconds);
-                    clearInterval(interval);
-                } else {
-                    setAmountSecondsPassed(secondDifference)
-                }
-            }, 1000)
-        }
-
-        // Função para resetar o que eu estava fazendo antes
-        return () => {
-            clearInterval(interval);
-        }
-    }, [activeCycle, totalSeconds, activeCycleId]);
-
-    //Mudando o title da página com useEffect
-    useEffect(() => {
-        if (activeCycle) {
-            document.title = `${minutes}:${seconds}`
-        }
-    }, [minutes, seconds, activeCycle]);
 
     const task = watch('task');
     const isSubmitDisabled = !task;
@@ -124,8 +77,10 @@ export function Home() {
         <HomeContainer>
             <form onSubmit={handleSubmit(handleCreateNewCycle)} action="">
 
-                <NewCycleForm />
-                <Countdown />
+                <CyclesContext.Provider value={{ activeCycle, activeCycleId, markCurrentCycleAsFinished }}>
+                    <NewCycleForm />
+                    <Countdown />
+                </CyclesContext.Provider>
 
                 {activeCycle ? (
                     <StopCountdownButton

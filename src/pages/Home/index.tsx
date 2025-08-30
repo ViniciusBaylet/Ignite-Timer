@@ -2,7 +2,7 @@ import { Hand, Play } from "lucide-react";
 
 import { HomeContainer, StartCountdownButton, StopCountdownButton } from "./styles";
 
-import { createContext, useContext, useState } from "react";
+import { useContext } from "react";
 import { NewCycleForm } from "./components/NewCycleForm";
 import { Countdown } from "./components/Countdown";
 import { FormProvider, useForm } from "react-hook-form";
@@ -29,7 +29,7 @@ const newCycleFormValidationSchema = zod.object({
 type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>;
 
 export function Home() {
-    const { activeCycle, createNewCycle, interruptCurrentCycle} = useContext(CyclesContext);
+    const { activeCycle, createNewCycle, interruptCurrentCycle } = useContext(CyclesContext);
 
     const newCycleForm = useForm<NewCycleFormData>({
         resolver: zodResolver(newCycleFormValidationSchema),
@@ -40,12 +40,18 @@ export function Home() {
     });
     const { handleSubmit, watch, reset } = newCycleForm;
 
+    //Função que começa com handle é pq ela será chamada dentro de um evento
+    function handleCreateNewCycle(data: NewCycleFormData) {
+        createNewCycle(data);
+        reset();
+    }
+
     const task = watch('task');
     const isSubmitDisabled = !task;
 
     return (
         <HomeContainer>
-            <form onSubmit={handleSubmit(createNewCycle)} action="">
+            <form onSubmit={handleSubmit(handleCreateNewCycle)} action="">
 
                 <FormProvider {...newCycleForm}>
                     <NewCycleForm />

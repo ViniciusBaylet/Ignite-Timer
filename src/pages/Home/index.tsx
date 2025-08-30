@@ -2,13 +2,14 @@ import { Hand, Play } from "lucide-react";
 
 import { HomeContainer, StartCountdownButton, StopCountdownButton } from "./styles";
 
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { NewCycleForm } from "./components/NewCycleForm";
 import { Countdown } from "./components/Countdown";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import zod from "zod";
+import { CyclesContext } from "../../contexts/CyclesContext";
 
 // Prop Drilling -> Quando a gente tem MUITAS props APENAS para comunicação entre componentes
 // Context API -> Permite compartilharmos informações entre VÁRIOS componentes ao mesmo tempo
@@ -27,30 +28,8 @@ const newCycleFormValidationSchema = zod.object({
 
 type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>;
 
-interface Cycle {
-    id: string;
-    task: string;
-    minutesAmount: number;
-    startDate: Date;
-    interruptDate?: Date;
-    finishedDate?: Date;
-}
-
-interface CyclesContextType {
-    activeCycle: Cycle | undefined;
-    activeCycleId: string | null;
-    markCurrentCycleAsFinished: () => void;
-    amountSecondsPassed: number;
-    setAmountSecondsPassed: React.Dispatch<React.SetStateAction<number>>;
-}
-
-export const CyclesContext = createContext({} as CyclesContextType);
-
 export function Home() {
-
-    const [cycles, setCycles] = useState<Cycle[]>([]);
-    const [activeCycleId, setActiveCycleId] = useState<string | null>(null);
-    const [amountSecondsPassed, setAmountSecondsPassed] = useState(0);
+    const { activeCycle, createNewCycle, interruptCurrentCycle} = useContext(CyclesContext);
 
     const newCycleForm = useForm<NewCycleFormData>({
         resolver: zodResolver(newCycleFormValidationSchema),
@@ -61,62 +40,22 @@ export function Home() {
     });
     const { handleSubmit, watch, reset } = newCycleForm;
 
-    function handleCreateNewCycle(data: NewCycleFormData) {
-        const newCycle: Cycle = {
-            id: String(new Date().getTime()),
-            task: data.task,
-            minutesAmount: data.minutesAmount,
-            startDate: new Date()
-        }
-
-        setCycles((state) => [...state, newCycle]);
-        setActiveCycleId(newCycle.id);
-        setAmountSecondsPassed(0);
-
-        reset();
-    }
-
-    function handleInterruptCycle() {
-        setCycles(state => state.map(cycle => {
-            if (cycle.id == activeCycleId) {
-                return { ...cycle, interruptDate: new Date() }
-            } else {
-                return cycle
-            }
-        }));
-
-        setActiveCycleId(null);
-    }
-
-    function markCurrentCycleAsFinished() {
-        setCycles(state => state.map(cycle => {
-            if (cycle.id == activeCycleId) {
-                return { ...cycle, finishedDate: new Date() }
-            } else {
-                return cycle
-            }
-        }))
-    }
-
-    const activeCycle = cycles.find((cycle) => cycle.id == activeCycleId);
-
     const task = watch('task');
     const isSubmitDisabled = !task;
 
     return (
         <HomeContainer>
-            <form onSubmit={handleSubmit(handleCreateNewCycle)} action="">
+            <form onSubmit={handleSubmit(createNewCycle)} action="">
 
-                <CyclesContext.Provider value={{ activeCycle, activeCycleId, markCurrentCycleAsFinished, amountSecondsPassed, setAmountSecondsPassed }}>
-                    <FormProvider {...newCycleForm}>
-                        <NewCycleForm />
-                    </FormProvider>
-                    <Countdown />
-                </CyclesContext.Provider>
+                <FormProvider {...newCycleForm}>
+                    <NewCycleForm />
+                </FormProvider>
+                <Countdown />
+
 
                 {activeCycle ? (
                     <StopCountdownButton
-                        onClick={handleInterruptCycle}
+                        onClick={interruptCurrentCycle}
                         type="button"
                     >
                         <Hand size={15} />

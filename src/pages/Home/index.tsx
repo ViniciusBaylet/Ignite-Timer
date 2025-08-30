@@ -5,9 +5,27 @@ import { HomeContainer, StartCountdownButton, StopCountdownButton } from "./styl
 import { createContext, useEffect, useState } from "react";
 import { NewCycleForm } from "./components/NewCycleForm";
 import { Countdown } from "./components/Countdown";
+import { FormProvider, useForm } from "react-hook-form";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import zod from "zod";
 
 // Prop Drilling -> Quando a gente tem MUITAS props APENAS para comunicação entre componentes
 // Context API -> Permite compartilharmos informações entre VÁRIOS componentes ao mesmo tempo
+// O ideal é manter no contexto variáveis ou funções que não vão mudar se a gente, por exemplo, trocar uma biblioteca
+// React-Hook-Form tem seu próprio contexto chamado de FormProvider
+
+const newCycleFormValidationSchema = zod.object({
+    task: zod.string().min(1, "Informe a tarefa"),
+    minutesAmount: zod.number().min(1, "O ciclo precisa de no mínimo 1 minuto").max(60, "O ciclo precisa ser de no máximo 60 minutos")
+});
+
+// interface NewCycleFormData {
+//     task: string
+//     minutesAmount: number
+// }
+
+type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>;
 
 interface Cycle {
     id: string;
@@ -22,6 +40,8 @@ interface CyclesContextType {
     activeCycle: Cycle | undefined;
     activeCycleId: string | null;
     markCurrentCycleAsFinished: () => void;
+    amountSecondsPassed: number;
+    setAmountSecondsPassed: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const CyclesContext = createContext({} as CyclesContextType);
@@ -30,6 +50,16 @@ export function Home() {
 
     const [cycles, setCycles] = useState<Cycle[]>([]);
     const [activeCycleId, setActiveCycleId] = useState<string | null>(null);
+    const [amountSecondsPassed, setAmountSecondsPassed] = useState(0);
+
+    const newCycleForm = useForm<NewCycleFormData>({
+        resolver: zodResolver(newCycleFormValidationSchema),
+        defaultValues: {
+            task: "",
+            minutesAmount: 0
+        }
+    });
+    const { handleSubmit, watch, reset } = newCycleForm;
 
     function handleCreateNewCycle(data: NewCycleFormData) {
         const newCycle: Cycle = {
@@ -77,8 +107,10 @@ export function Home() {
         <HomeContainer>
             <form onSubmit={handleSubmit(handleCreateNewCycle)} action="">
 
-                <CyclesContext.Provider value={{ activeCycle, activeCycleId, markCurrentCycleAsFinished }}>
-                    <NewCycleForm />
+                <CyclesContext.Provider value={{ activeCycle, activeCycleId, markCurrentCycleAsFinished, amountSecondsPassed, setAmountSecondsPassed }}>
+                    <FormProvider {...newCycleForm}>
+                        <NewCycleForm />
+                    </FormProvider>
                     <Countdown />
                 </CyclesContext.Provider>
 

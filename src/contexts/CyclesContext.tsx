@@ -1,5 +1,6 @@
 import { createContext, useState, type ReactNode, useReducer } from "react";
-import { ActionTypes, cyclesReducer, type Cycle } from "../reducers/cycles";
+import { cyclesReducer, type Cycle } from "../reducers/cycles/reducer";
+import { ActionTypes, addNewCycleAction, interruptCurrentCycleAction, markCurrentCycleAsFinishedAction } from "../reducers/cycles/actions";
 
 //useReducer -> funciona como o useState porém para armazenar informações mais complexas
 
@@ -46,32 +47,17 @@ export function CyclesContextProvider({ children }: CyclesContextProviderProps) 
             startDate: new Date()
         }
 
-        dispatch({
-            type: ActionTypes.ADD_NEW_CYCLE,
-            payload: {
-                newCycle
-            }
-        });
+        dispatch(addNewCycleAction(newCycle))
 
         setAmountSecondsPassed(0);
     }
 
     function interruptCurrentCycle() {
-        dispatch({
-            type: ActionTypes.INTERRUPT_CURRENT_CYCLE,
-            payload: {
-                activeCycleId
-            }
-        });
+        dispatch(interruptCurrentCycleAction())
     }
 
     function markCurrentCycleAsFinished() {
-        dispatch({
-            type: ActionTypes.MARK_CURRENT_CYCLE_AS_FINISHED,
-            payload: {
-                activeCycleId
-            }
-        })
+        dispatch(markCurrentCycleAsFinishedAction())
     }
 
     return (

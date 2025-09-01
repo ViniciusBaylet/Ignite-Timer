@@ -1,69 +1,61 @@
-# React + TypeScript + Vite
+# 📘 Projeto Ignite-Timer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este projeto foi desenvolvido em **React** com diversas bibliotecas e padrões modernos de desenvolvimento frontend.  
+O objetivo é aplicar boas práticas de organização, componentização, gerenciamento de estado e validação de formulários.  
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Tecnologias utilizadas
 
-## Expanding the ESLint configuration
+### 🔹 Dependências principais
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **[React](https://react.dev/)**  
+  Biblioteca principal para construção de interfaces de usuário baseadas em componentes.
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **[React DOM](https://react.dev/reference/react-dom)**  
+  Integra o React ao navegador, permitindo renderizar os componentes na árvore do DOM.
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+- **[React Router DOM](https://reactrouter.com/)**  
+  Responsável pela navegação entre páginas sem recarregar a aplicação, garantindo uma experiência de SPA (Single Page Application).
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- **[Styled Components](https://styled-components.com/)**  
+  Biblioteca para estilização de componentes utilizando **CSS-in-JS**, permitindo criar estilos dinâmicos baseados em props.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- **[React Hook Form](https://react-hook-form.com/)**  
+  Biblioteca para gerenciamento de formulários com performance otimizada e fácil integração com validações.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- **[@hookform/resolvers](https://react-hook-form.com/api/useform/#resolver)**  
+  Fornece adaptadores para integrar **React Hook Form** com bibliotecas de validação como o **Zod**.
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- **[Zod](https://zod.dev/)**  
+  Biblioteca de validação de dados com tipagem estática, garantindo segurança e consistência no tratamento de formulários.
+
+- **[Immer](https://immerjs.github.io/immer/)**  
+  Facilita a manipulação de estados imutáveis, permitindo escrever código como se fosse mutável mas garantindo imutabilidade por baixo dos panos.
+
+- **[Date-fns](https://date-fns.org/)**  
+  Biblioteca para manipulação de datas em JavaScript, com funções simples e performáticas.
+
+- **[Lucide React](https://lucide.dev/)**  
+  Conjunto de ícones em formato React, leves e altamente customizáveis.
+
+---
+
+### 🔹 Outras tecnologias e conceitos implementados
+
+- **Context API (React Contexts)**  
+  Utilizado para compartilhar estados globais entre componentes sem necessidade de "prop drilling".
+
+- **Reducers (useReducer)**  
+  Padrão de gerenciamento de estado inspirado no Redux, usado para organizar regras de atualização do estado.
+
+- **Layout fixo de páginas**  
+  Estrutura base de layout reutilizável em múltiplas páginas, garantindo consistência visual e melhor manutenção.
+
+- **React Router (Rotas protegidas e públicas)**  
+  Estrutura de navegação configurada para diferentes páginas, podendo incluir rotas privadas.
+
+- **Local Storage**  
+  Utilizado para persistência de dados localmente no navegador, garantindo que informações sejam mantidas mesmo após atualização da página.
+
+---

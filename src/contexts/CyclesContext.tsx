@@ -1,6 +1,6 @@
 import { createContext, useState, type ReactNode, useReducer } from "react";
 import { cyclesReducer, type Cycle } from "../reducers/cycles/reducer";
-import { ActionTypes, addNewCycleAction, interruptCurrentCycleAction, markCurrentCycleAsFinishedAction } from "../reducers/cycles/actions";
+import { addNewCycleAction, interruptCurrentCycleAction, markCurrentCycleAsFinishedAction } from "../reducers/cycles/actions";
 
 //useReducer -> funciona como o useState porém para armazenar informações mais complexas
 
